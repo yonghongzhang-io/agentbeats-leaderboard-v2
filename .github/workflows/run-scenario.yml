@@ -33,13 +33,35 @@ jobs:
           python - <<'PY'
           import yaml
 
-          with open("docker-compose.yml", "r", encoding="utf-8") as handle:
-              compose = yaml.safe_load(handle)
+          path = "docker-compose.yml"
+          with open(path, "r", encoding="utf-8") as f:
+              data = yaml.safe_load(f)
 
-          compose["services"]["agentbeats-client"]["entrypoint"] = ["agentbeats-client"]
+          services = (data or {}).get("services", {})
+          svc = services.get("agentbeats-client")
 
-          with open("docker-compose.yml", "w", encoding="utf-8") as handle:
-              yaml.safe_dump(compose, handle, sort_keys=False)
+          if not svc:
+              raise SystemExit("agentbeats-client service not found in docker-compose.yml")
+
+          # If the compose command starts with flags (e.g. --host), Docker will try to exec the flag.
+          # Ensure the container has a real executable as entrypoint.
+          cmd = svc.get("command")
+          if cmd is None:
+              # Nothing to do; entrypoint will still be set for safety.
+              pass
+          elif isinstance(cmd, list) and cmd and isinstance(cmd[0], str) and cmd[0].startswith("--"):
+              # Keep flags as command; entrypoint will provide the binary.
+              pass
+          elif isinstance(cmd, str) and cmd.strip().startswith("--"):
+              pass
+
+          # Set a safe entrypoint so command flags are interpreted correctly.
+          svc["entrypoint"] = ["agentbeats-client"]
+
+          with open(path, "w", encoding="utf-8") as f:
+              yaml.safe_dump(data, f, sort_keys=False)
+
+          print("Patched docker-compose.yml: set agentbeats-client entrypoint")
           PY
 
       - name: Pull images
