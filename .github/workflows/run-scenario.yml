@@ -28,6 +28,20 @@ jobs:
       - name: Generate docker-compose.yml
         run: python generate_compose.py --scenario scenario.toml
 
+      - name: Patch docker-compose entrypoint for agentbeats-client
+        run: |
+          python - <<'PY'
+          import yaml
+
+          with open("docker-compose.yml", "r", encoding="utf-8") as handle:
+              compose = yaml.safe_load(handle)
+
+          compose["services"]["agentbeats-client"]["entrypoint"] = ["agentbeats-client"]
+
+          with open("docker-compose.yml", "w", encoding="utf-8") as handle:
+              yaml.safe_dump(compose, handle, sort_keys=False)
+          PY
+
       - name: Pull images
         run: |
           if ! docker compose pull; then
