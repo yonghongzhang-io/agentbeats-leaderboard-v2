@@ -32,7 +32,7 @@ jobs:
       - name: Generate docker-compose.yml
         run: python generate_compose.py --scenario scenario.ci.toml
 
-      - name: Patch docker-compose entrypoint for agentbeats-client
+      - name: Patch docker-compose for agentbeats-client
         run: |
           python - <<'PY'
           import yaml
@@ -47,26 +47,13 @@ jobs:
           if not svc:
               raise SystemExit("agentbeats-client service not found in docker-compose.yml")
 
-          # If the compose command starts with flags (e.g. --host), Docker will try to exec the flag.
-          # Ensure the container has a real executable as entrypoint.
-          cmd = svc.get("command")
-          if cmd is None:
-              # Nothing to do; entrypoint will still be set for safety.
-              pass
-          elif isinstance(cmd, list) and cmd and isinstance(cmd[0], str) and cmd[0].startswith("--"):
-              # Keep flags as command; entrypoint will provide the binary.
-              pass
-          elif isinstance(cmd, str) and cmd.strip().startswith("--"):
-              pass
-
-          # Set a safe entrypoint so command flags are interpreted correctly.
-          # Note: The AgentBeats CLI binary is "agentbeats-run", not "agentbeats-client"
-          svc["entrypoint"] = ["agentbeats-run"]
+          # Remove any entrypoint override - let the image use its default ENTRYPOINT/CMD
+          svc.pop("entrypoint", None)
 
           with open(path, "w", encoding="utf-8") as f:
               yaml.safe_dump(data, f, sort_keys=False)
 
-          print("Patched docker-compose.yml: set agentbeats-run entrypoint")
+          print("Patched docker-compose.yml: removed entrypoint override for agentbeats-client")
           PY
 
       - name: Check GHCR_TOKEN is set
