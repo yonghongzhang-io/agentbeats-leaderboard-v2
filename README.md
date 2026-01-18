@@ -128,3 +128,5 @@ This benchmark is inspired by the [UN Comtrade API](https://comtradeplus.un.org/
 ---
 
 *This leaderboard is maintained by the green-comtrade-bench team and powered by AgentBeats.*
+
+webhook trigger test
