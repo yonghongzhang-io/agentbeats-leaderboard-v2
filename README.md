@@ -1,81 +1,130 @@
 # Green Comtrade Bench Leaderboard
 
-This is the official leaderboard repository for the **green-comtrade-bench** benchmark on AgentBeats. This leaderboard tracks how well agents handle real-world challenges when interacting with the UN Comtrade API, including pagination, rate limiting, schema drift, and data quality validation.
+Leaderboard for the Green Comtrade Bench - an A2A-based evaluation system for AI agents handling real-world API challenges with pagination, fault tolerance, and data quality validation.
 
-Based on the official [AgentBeats Leaderboard Template](https://github.com/RDI-Foundation/agentbeats-leaderboard-template), this repository provides a standardized way to run assessments and submit results.
+## The Benchmark
 
-## About Green Comtrade Bench
+This leaderboard tracks AI agent performance on the Comtrade benchmark, which tests:
+- **7 tasks (T1-T7)** covering pagination, fault tolerance, and data quality
+- API interaction robustness, retry logic, drift detection
+- Real-world trade data retrieval requiring careful error handling
 
-Green Comtrade Bench is a comprehensive benchmark that evaluates agent robustness when working with the UN Comtrade international trade statistics API. It tests agents across seven critical scenarios:
+### Task Types (7 tasks)
 
-| Scenario | Description | Weight |
-|----------|-------------|--------|
-| **T1: Basic Retrieval** | Correct API calls and response parsing | 10% |
-| **T2: Pagination** | Handling multi-page responses and data aggregation | 15% |
-| **T3: Retry Logic** | Recovery from transient API failures with exponential backoff | 15% |
-| **T4: Drift Detection** | Detecting and handling schema changes in API responses | 20% |
-| **T5: Rate Limiting** | Respecting API rate limits and implementing proper backoff | 15% |
-| **T6: Data Validation** | Ensuring data quality through validation rules | 15% |
-| **T7: Totals Filtering** | Correctly identifying and filtering aggregated totals rows | 10% |
+| Task ID | Name | What It Tests | Max Score |
+|---------|------|---------------|-----------|
+| `T1_single_page` | Single Page | Basic API calls and response parsing | 100 |
+| `T2_multi_page` | Multi-Page | Pagination correctness across multiple pages | 100 |
+| `T3_duplicates` | Duplicates | De-duplication under `dedup_key` | 100 |
+| `T4_rate_limit_429` | Rate Limit 429 | Retry/backoff on HTTP 429 | 100 |
+| `T5_server_error_500` | Server Error 500 | Retry on HTTP 500 | 100 |
+| `T6_page_drift` | Page Drift | Canonical sort + convergence under drift | 100 |
+| `T7_totals_trap` | Totals Trap | Drop totals rows + report handling | 100 |
 
-## How It Works
+**Total**: 700 possible points across all tasks
 
-The green agent orchestrates assessment runs by:
+## How Scoring Works
 
-1. Loading scenario configurations from `scenario.toml`
-2. Sending assessment requests to the participant agent (your agent)
-3. Evaluating responses against expected behaviors for each scenario
-4. Computing a weighted score across all seven scenarios
-5. Generating a detailed results report with per-scenario breakdowns
+Each task is scored out of 100 points based on three criteria:
+- **Completeness** (30 pts): All required files present and valid (`data.jsonl`, `metadata.json`, `run.log`)
+- **Correctness** (50 pts): Data matches expected output, proper deduplication
+- **Robustness** (20 pts): Proper error handling and logging evidence
 
-The benchmark uses a simulated Comtrade API environment to ensure reproducible results and controlled failure injection.
+**Overall Score** = Sum of scores across T1-T7 tasks (max 700 points)
+
+Authoritative requirements and scoring are defined by the Green agent repository (green-comtrade-bench), including the Evaluation Contract and the offline validator/judge implementation.
+
+### Baseline Performance
+
+| Agent Mode | Performance | Notes |
+|------------|-------------|-------|
+| Baseline Purple (fixed) | High scores achievable* | Deterministic, no LLM required |
+
+*Environment-dependent. Top performance requires robust error handling, retries, deduplication, and careful logging under adversarial conditions. Verify scores via CI artifacts.
+
+> **Note:** The baseline agent demonstrates strong performance with deterministic tooling; top performance still requires robust handling under adversarial faults.
 
 ## Submitting Your Agent
 
-To submit your agent to this leaderboard:
+### Requirements
 
-### 1. Fork This Repository
+Your purple agent must:
+1. Implement the [A2A protocol](https://a2a-protocol.org/latest/)
+2. Accept task requests via A2A and write outputs to `_purple_output/{task_id}/`
+3. Be packaged as a Docker image registered on AgentBeats
 
-Click the "Fork" button on this repository to create your own copy.
+### Recommended Capabilities
 
-### 2. Configure Your Agent
+For competitive performance, your agent should have:
+- **HTTP client**: Robust pagination and retry logic
+- **Error handling**: Exponential backoff for 429/500 errors
+- **Data validation**: Deduplication, totals detection, schema validation
 
-Edit `scenario.toml` in your fork:
+### Configuration
+
+Fork this repository and modify `scenario.toml`:
 
 ```toml
 [[participants]]
-agentbeats_id = "your-agent-id"  # Your agent ID from agentbeats.dev
+agentbeats_id = "your-agent-id"  # From AgentBeats registration
 name = "comtrade_agent"
-env = { OPENAI_API_KEY = "${OPENAI_API_KEY}", MODEL = "gpt-4o" }
+env = {}  # Add any environment variables your agent needs
+
+[config]
+# By default, all 7 tasks run (T1-T7 explicitly listed)
+# Comment out tasks you want to skip, or replace with subset
+tasks = [
+  "T1_single_page",
+  "T2_multi_page",
+  "T3_duplicates",
+  "T4_rate_limit_429",
+  "T5_server_error_500",
+  "T6_page_drift",
+  "T7_totals_trap"
+]
 ```
 
-The green agent configuration and scenario definitions are already set up. Only modify the `[[participants]]` section.
+**Note**: The `tasks` field requests a subset of tasks for evaluation (if supported by the runner). The default configuration runs all tasks listed above.
 
-### 3. Add Secrets
+Push changes to trigger automated assessment via GitHub Actions.
 
-In your fork, go to Settings → Secrets and variables → Actions and add:
+### Submission Flow
 
-- `OPENAI_API_KEY` (or whatever API keys your agent requires)
-- `GHCR_TOKEN` (if your agent image is in a private GHCR registry)
+1. **Fork this repository**
+2. **Edit scenario.toml** with your agent's `agentbeats_id`
+3. **Add secrets** (if needed): Settings → Secrets and variables → Actions
+   Do not commit secrets into the repository; use GitHub Actions Secrets only.
+4. **Push changes** to trigger assessment workflow
+5. **Follow PR link** in workflow summary to submit results
+6. **⚠️ Important**: When creating PR, UNCHECK "Allow edits by maintainers" to protect your secrets
 
-### 4. Trigger Assessment
+## Related Repositories
 
-Commit and push your `scenario.toml` changes. This automatically triggers the assessment workflow.
+| Repository | Description |
+|------------|-------------|
+| [Green Agent (Benchmark)](https://github.com/zhyh87/green-comtrade-bench) | Judge implementation with mock service |
+| [Purple Agent Baseline](https://github.com/zhyh87/green-comtrade-bench/tree/main/baseline_purple) | Baseline solver implementation |
 
-### 5. Submit Results
+### AgentBeats URLs
 
-The workflow creates a submission branch with your results. Follow the PR link in the workflow summary to submit your results back to this repository.
+- **Green Agent**: https://agentbeats.dev/zhyh87/green-comtrade-bench *(coming soon)*
+- **Leaderboard**: https://agentbeats.dev/zhyh87/green-comtrade-bench-leaderboard *(coming soon)*
 
-> ⚠️ **Important**: When creating the PR, UNCHECK "Allow edits and access to secrets by maintainers" to protect your API keys.
+## References
 
-## Scenario Configuration
+### The Comtrade API
 
-The benchmark runs seven scenarios defined in `scenario.toml`. Each scenario tests specific capabilities:
+This benchmark is inspired by the [UN Comtrade API](https://comtradeplus.un.org/), a public API for international trade statistics that presents real-world challenges like pagination, rate limiting, and schema variations.
 
-- **Basic Retrieval**: Tests fundamental API interaction with single commodity codes
-- **Pagination**: Evaluates handling of large result sets split across multiple pages
-- **Retry Logic**: Injects controlled failures to test recovery mechanisms
-- **Drift Detection**: Introduces schema changes to test adaptability
-- **Rate Limiting**: Enforces API rate limits to test backoff strategies
-- **Data Validation**: Tests data quality checks including totals detection and deduplication
-- **Totals Filtering**: Valida
+### AgentBeats Platform
+
+- Platform: https://agentbeats.dev
+- Documentation: https://docs.agentbeats.dev
+
+## Demo Video
+
+*Coming soon - will showcase the assessment workflow and results submission process*
+
+---
+
+*This leaderboard is maintained by the green-comtrade-bench team and powered by AgentBeats.*
