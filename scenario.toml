@@ -1,5 +1,5 @@
 [green_agent]
-agentbeats_id = "019bc240-3f4d-76d3-ac6f-b8b3becaf848"
+agentbeats_id = "019bd1bd-7774-73f1-b645-b192f262e843"
 env = { LOG_LEVEL = "INFO" }
 
 [[participants]]
