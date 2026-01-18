@@ -1,9 +1,8 @@
 [green_agent]
 agentbeats_id = "019bd1bd-7774-73f1-b645-b192f262e843"
-env = { LOG_LEVEL = "INFO" }
 
 [[participants]]
-agentbeats_id = ""  # Users fill this in when forking
+agentbeats_id = "YOUR_AGENTBEATS_ID"  # Users must replace this when forking
 name = "comtrade_agent"
 env = {}
 
