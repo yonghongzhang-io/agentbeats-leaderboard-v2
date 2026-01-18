@@ -1,5 +1,4 @@
-# Default scenario for local development
-# CI uses scenario.ci.toml (triggered by workflow on push to scenario.ci.toml)
+# Local testing scenario - uses image for green agent (faster, no API call)
 
 [green_agent]
 image = "ghcr.io/yonghongzhang-io/green-comtrade-bench-v2:latest"

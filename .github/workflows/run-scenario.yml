@@ -3,7 +3,7 @@ name: Run Scenario
 on:
   push:
     paths:
-      - 'scenario.toml'
+      - 'scenario.ci.toml'
 
 jobs:
   run:
@@ -26,7 +26,7 @@ jobs:
         run: pip install tomli tomli-w pyyaml requests
 
       - name: Generate docker-compose.yml
-        run: python generate_compose.py --scenario scenario.toml
+        run: python generate_compose.py --scenario scenario.ci.toml
 
       - name: Patch docker-compose entrypoint for agentbeats-client
         run: |
@@ -124,7 +124,7 @@ jobs:
 
       - name: Copy files to submission directory
         run: |
-          cp scenario.toml submissions/${{ steps.metadata.outputs.unique_name }}.toml
+          cp scenario.ci.toml submissions/${{ steps.metadata.outputs.unique_name }}.toml
           cp output/results.json results/${{ steps.metadata.outputs.unique_name }}.json
           cp output/provenance.json submissions/${{ steps.metadata.outputs.unique_name }}.provenance.json
 
