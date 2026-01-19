@@ -18,8 +18,8 @@ jobs:
   run:
     runs-on: ubuntu-latest
     env:
-      GREEN_IMAGE: ghcr.io/yonghongzhang-io/green-comtrade-bench-v2:${{ env.GREEN_SHA }}
-      PURPLE_IMAGE: ghcr.io/yonghongzhang-io/purple-comtrade-baseline-v2:${{ env.PURPLE_SHA }}
+      GREEN_IMAGE: ghcr.io/yonghongzhang-io/green-comtrade-bench-v2:e210491
+      PURPLE_IMAGE: ghcr.io/yonghongzhang-io/purple-comtrade-baseline-v2:fdfbbff
     if: github.event.repository.fork == true || github.ref == 'refs/heads/main'
     permissions:
       contents: write
