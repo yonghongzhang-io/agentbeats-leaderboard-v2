@@ -62,19 +62,37 @@ DEFAULT_ENV_VARS = {"PYTHONUNBUFFERED": "1"}
 COMPOSE_TEMPLATE = """# Auto-generated from scenario.toml
 
 services:
+  mock-comtrade:
+    image: {mock_image}
+    platform: linux/amd64
+    container_name: mock-comtrade
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - agent-network
+
   green-agent:
     image: {green_image}
     platform: linux/amd64
     container_name: green-agent
     command: ["--host", "0.0.0.0", "--port", "{green_port}", "--card-url", "http://green-agent:{green_port}"]
     environment:{green_env}
+    volumes:
+      - purple_output:/workspace/purple_output
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:{green_port}/.well-known/agent-card.json"]
       interval: 5s
       timeout: 3s
       retries: 10
       start_period: 30s
-    depends_on:{green_depends}
+    depends_on:
+      mock-comtrade:
+        condition: service_healthy
+{green_participant_depends}
     networks:
       - agent-network
 
@@ -91,6 +109,9 @@ services:
     networks:
       - agent-network
 
+volumes:
+  purple_output:
+
 networks:
   agent-network:
     driver: bridge
@@ -102,12 +123,17 @@ PARTICIPANT_TEMPLATE = """  {name}:
     container_name: {name}
     command: ["--host", "0.0.0.0", "--port", "{port}", "--card-url", "http://{name}:{port}"]
     environment:{env}
+    volumes:
+      - purple_output:/workspace/purple_output
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:{port}/.well-known/agent-card.json"]
       interval: 5s
       timeout: 3s
       retries: 10
       start_period: 30s
+    depends_on:
+      mock-comtrade:
+        condition: service_healthy
     networks:
       - agent-network
 """
@@ -207,11 +233,15 @@ def generate_docker_compose(scenario: dict[str, Any]) -> str:
 
     all_services = ["green-agent"] + participant_names
 
+    # Get mock image from env var or use default
+    mock_image = os.environ.get("MOCK_IMAGE", "ghcr.io/yonghongzhang-io/green-comtrade-bench-v2-mock:latest")
+
     return COMPOSE_TEMPLATE.format(
+        mock_image=mock_image,
         green_image=green["image"],
         green_port=DEFAULT_PORT,
         green_env=format_env_vars(green.get("env", {})),
-        green_depends=format_depends_on(participant_names),
+        green_participant_depends=format_depends_on(participant_names) if participant_names else "",
         participant_services=participant_services,
         client_depends=format_depends_on(all_services)
     )

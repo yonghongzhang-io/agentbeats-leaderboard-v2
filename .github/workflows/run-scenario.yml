@@ -15,6 +15,7 @@ jobs:
     env:
       GREEN_IMAGE: ghcr.io/yonghongzhang-io/green-comtrade-bench-v2:fb6740d23c41da6745b5621595141425533722eb
       PURPLE_IMAGE: ghcr.io/yonghongzhang-io/purple-comtrade-baseline-v2:3d65ab33170a47e8f8301a5dbd2c4f1244f21fc6
+      MOCK_IMAGE: ghcr.io/yonghongzhang-io/green-comtrade-bench-v2-mock:fb6740d23c41da6745b5621595141425533722eb
     if: github.event.repository.fork == true || github.ref == 'refs/heads/main'
     permissions:
       contents: write
