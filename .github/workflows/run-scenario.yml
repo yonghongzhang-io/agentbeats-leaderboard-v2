@@ -13,9 +13,9 @@ jobs:
   run:
     runs-on: ubuntu-latest
     env:
-      GREEN_IMAGE: ghcr.io/yonghongzhang-io/green-comtrade-bench-v2:fb6740d23c41da6745b5621595141425533722eb
+      GREEN_IMAGE: ghcr.io/yonghongzhang-io/green-comtrade-bench-v2:10b34c3a960607d957e9938abae20ee785c18b88
       PURPLE_IMAGE: ghcr.io/yonghongzhang-io/purple-comtrade-baseline-v2:3d65ab33170a47e8f8301a5dbd2c4f1244f21fc6
-      MOCK_IMAGE: ghcr.io/yonghongzhang-io/green-comtrade-bench-v2-mock:fb6740d23c41da6745b5621595141425533722eb
+      MOCK_IMAGE: ghcr.io/yonghongzhang-io/green-comtrade-bench-v2-mock:10b34c3a960607d957e9938abae20ee785c18b88
     if: github.event.repository.fork == true || github.ref == 'refs/heads/main'
     permissions:
       contents: write
