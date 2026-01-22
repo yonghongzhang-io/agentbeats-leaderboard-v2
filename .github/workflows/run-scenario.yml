@@ -9,17 +9,12 @@ on:
       - 'generate_compose.py'
       - 'record_provenance.py'
 
-env:
-  # Pin image SHAs to avoid stale :latest tags
-  GREEN_SHA: "fc1160d"
-  PURPLE_SHA: "653d7a3"
-
 jobs:
   run:
     runs-on: ubuntu-latest
     env:
-      GREEN_IMAGE: ghcr.io/yonghongzhang-io/green-comtrade-bench-v2:latest
-      PURPLE_IMAGE: ghcr.io/yonghongzhang-io/purple-comtrade-baseline-v2:latest
+      GREEN_IMAGE: ghcr.io/yonghongzhang-io/green-comtrade-bench-v2:a326db9
+      PURPLE_IMAGE: ghcr.io/yonghongzhang-io/purple-comtrade-baseline-v2:653d7a3
     if: github.event.repository.fork == true || github.ref == 'refs/heads/main'
     permissions:
       contents: write
