@@ -1,0 +1,18 @@
+{
+  "image_digests": {
+    "mock-comtrade": "ghcr.io/yonghongzhang-io/green-comtrade-bench-v2-mock@sha256:67a087f1f28055d366a1d6b7fcc1aada5b7a1f7c527c9283e4c6c492c1777c45",
+    "green-agent": "ghcr.io/yonghongzhang-io/green-comtrade-bench-v2@sha256:27d9596ee24e3edbfec53faf515d952e60b4b12511a7f2f9506f14d2c90c4fad",
+    "purple-comtrade-baseline-v2": "ghcr.io/yonghongzhang-io/purple-comtrade-baseline-v2@sha256:d28a84cae0edd959cfbeb8a60e5b1f77f6254675581c633c1ad3a7e326ff6a39",
+    "agentbeats-client": "ghcr.io/agentbeats/agentbeats-client@sha256:13dfe3ef4e583a80e7ce2fe3becd0ce3b879841368a7f4fa40b6ebbabeeb014e"
+  },
+  "timestamp": "2026-01-23T11:33:37Z",
+  "github_actions": {
+    "run_url": "https://github.com/yonghongzhang-io/agentbeats-leaderboard-v2/actions/runs/21284636392",
+    "run_logs_url": "https://api.github.com/repos/yonghongzhang-io/agentbeats-leaderboard-v2/actions/runs/21284636392/logs",
+    "ref": "refs/heads/main",
+    "sha": "5c469df9cea18992866d6d2cd2fcd712a4d488ba",
+    "repository_url": "https://github.com/yonghongzhang-io/agentbeats-leaderboard-v2",
+    "workflow_ref": "yonghongzhang-io/agentbeats-leaderboard-v2/.github/workflows/run-scenario.yml@refs/heads/main",
+    "workflow_sha": "5c469df9cea18992866d6d2cd2fcd712a4d488ba"
+  }
+}
